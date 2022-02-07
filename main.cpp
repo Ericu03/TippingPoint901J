@@ -60,12 +60,12 @@ void opcontrol() {
 
 
 	while(true){
-//std::cout <<"right:" << right_enc.get_value();
+//std::cout <<"middle:" << mid_enc.get_value();
 
-		double power = 220*master.get_analog(ANALOG_LEFT_Y)/127;
-	double turn = 140*master.get_analog(ANALOG_RIGHT_X)/127;
-	int l = (int)(pow(((power + turn)/200.0),2.0)*170.0);
-	int r = (int) (pow(((power - turn)/200.0),2.0)*170.0);
+		double power = 200*master.get_analog(ANALOG_LEFT_Y)/127;
+	double turn = 200*master.get_analog(ANALOG_RIGHT_X)/127;
+	int l = (int)(pow(((power + turn)/200.0),2.0)*200.0);
+	int r = (int) (pow(((power - turn)/200.0),2.0)*200.0);
 	//printf("LEFt Angle: %ld \n", leftencoder.get_angle());
 
 
@@ -81,6 +81,12 @@ void opcontrol() {
 	if(power-turn >0){
 		r *=-1;
 	}
+	int frontleftvel = front_left_wheel.get_actual_velocity()*0.97;
+	int middleleftvel = middle_left_wheel.get_actual_velocity()*0.97;
+	int backleftvel = back_left_wheel.get_actual_velocity()*0.97;
+	int frontrightvel = front_right_wheel.get_actual_velocity();
+	int middlerightvel = middle_right_wheel.get_actual_velocity();
+	int backrightvel = back_right_wheel.get_actual_velocity();
 
 	front_left_wheel.move_velocity(l);
 	middle_left_wheel.move_velocity(l);
@@ -88,34 +94,91 @@ void opcontrol() {
 	front_right_wheel.move_velocity(r);
 	middle_right_wheel.move_velocity(r);
 	back_right_wheel.move_velocity(r);
+/**
+	if(front_left_wheel.get_position() < front_right_wheel.get_position()){
+		int difference = std::abs((back_right_wheel.get_target_velocity() - backrightvel)) / ((backrightvel+back_right_wheel.get_target_velocity())/2);
+		front_left_wheel.move_velocity(l);
+		middle_left_wheel.move_velocity(l);
+		back_left_wheel.move_velocity(l);
+		front_right_wheel.move_velocity(r*difference);
+		middle_right_wheel.move_velocity(r);
+		back_right_wheel.move_velocity(r*difference);
+	}
+**/
+	if(master.get_analog(ANALOG_LEFT_Y) ==0){
+		pros::delay(25);
+		front_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		back_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		back_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		pros::delay(14);
+		front_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		back_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		back_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	}
 
 
-	//lift
+
+
+
+
+//back lift
+	if(master.get_digital(DIGITAL_UP) != 0){
+		pneumatic2.set_value(false);
+		pneumatic3.set_value(false);
+
+	}
+
+
+	else if(master.get_digital(DIGITAL_DOWN) !=0){
+		pneumatic2.set_value(true);
+		pneumatic3.set_value(true);
+
+
+
+	}
+	else if((master.get_digital(DIGITAL_UP) != 0) & (master.get_digital(DIGITAL_Y) != 0)){
+		pneumatic2.set_value(false);
+		pneumatic2.set_value(false);
+		ring.move_voltage(12000);
+	}
+
+	if(master.get_digital(DIGITAL_Y) != 0){
+		ring.move_voltage(12000);
+
+	}
+	else if(master.get_digital(DIGITAL_A)!= 0){
+		ring.move_voltage(0);
+		ring.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	}
+
+
+	//front lift
 	if(master.get_digital(DIGITAL_L1) != 0){
+
 		lift.move_voltage(12000);
-		lift2.move_voltage(12000);
 
 	}
 	else if(master.get_digital(DIGITAL_L2) != 0){
-		lift.move_voltage(-10000);
-		lift2.move_voltage(-10000);
+
+		lift.move_voltage(-12000);
 	}
 	else{
 		lift.move_voltage(0);
-		lift2.move_voltage(0);
 		lift.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		lift2.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	}
 
-	//pneumatic pistons
+
+
+	//pneumatic pistons claw
 	if(master.get_digital(DIGITAL_R1) != 0){
-		pneumatic1.set_value(true);
-		pneumatic2.set_value(true);
+		pneumatic1.set_value(false);
+
 	}
 	else if(master.get_digital(DIGITAL_R2) != 0){
-		pneumatic1.set_value(false);
-		pneumatic2.set_value(false);
+		pneumatic1.set_value(true);
+
 	}
+
 
 	//brake function
 
