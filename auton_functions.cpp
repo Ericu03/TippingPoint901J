@@ -38,8 +38,8 @@ void slewRateControl(pros::Motor *motor, int targetVelocity, int increment){
 void base_PID(double targetdistance, int maxvelocity){//target distance in inches
 
 mid_enc.reset();
-//middle_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-//middle_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+middle_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+middle_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 double degreegoal = (targetdistance/CIRCUMFERENCE)*TICKS_PER_ROTATION;
 double target = 0.0;
 int maxvel = maxvelocity;
@@ -53,7 +53,7 @@ double derivative = 0.0;
 double previouserror = 0.0;
 target = degreegoal;
 double revolutions = 0;
-double kP = 0.06;//0.1625 4cm error
+double kP = 0.1725;//0.1625 4cm error
 double kI = 0.0005;//0.0005
 double kD = 0.005;//0.005
   if(target < 0){
@@ -72,27 +72,26 @@ double kD = 0.005;//0.005
 
       }
 
-
       derivative = error - previouserror;
       previouserror = error;
 
       targetVelocity = (kP * error) + (kI* integral) + (kD * derivative);
 
-      /**if(std::abs(targetVelocity) > std::abs(maxvel)){ to test
+      if(std::abs(targetVelocity) > std::abs(maxvel)){
         targetVelocity = maxvel;
-      }**/
+      }
     //  front_left_wheel.move_velocity(targetVelocity);//*0.94
-    //  back_left_wheel.move_velocity(targetVelocity);//*0.94
-    //  front_right_wheel.move_velocity(-targetVelocity);
-    //  back_right_wheel.move_velocity(-targetVelocity);
-    // middle_left_wheel.move_velocity(-targetVelocity);
-    // middle right_wheel.move_velocity(-targetVelocity);
+  //    back_left_wheel.move_velocity(targetVelocity);//*0.94
+  //    front_right_wheel.move_velocity(-targetVelocity);
+  //    back_right_wheel.move_velocity(-targetVelocity);
+  //   middle_left_wheel.move_velocity(-targetVelocity);
+  //   middle_right_wheel.move_velocity(-targetVelocity);
 
-      slewRateControl(&front_left_wheel, targetVelocity, DEFAULTSLEWRATEINCREMENT);
-      slewRateControl(&back_left_wheel, targetVelocity, DEFAULTSLEWRATEINCREMENT);
-      slewRateControl(&front_right_wheel, -targetVelocity, DEFAULTSLEWRATEINCREMENT);
+    slewRateControl(&front_left_wheel, targetVelocity, DEFAULTSLEWRATEINCREMENT);
+    slewRateControl(&back_left_wheel, targetVelocity, DEFAULTSLEWRATEINCREMENT);
+     slewRateControl(&front_right_wheel, -targetVelocity, DEFAULTSLEWRATEINCREMENT);
       slewRateControl(&back_right_wheel, -targetVelocity, DEFAULTSLEWRATEINCREMENT);
-      slewRateControl(&middle_left_wheel, -targetVelocity, DEFAULTSLEWRATEINCREMENT);
+      slewRateControl(&middle_left_wheel, targetVelocity, DEFAULTSLEWRATEINCREMENT);
       slewRateControl(&middle_right_wheel, -targetVelocity, DEFAULTSLEWRATEINCREMENT);
       if(std::abs(error) < 1.5){
         goalMet = true;
@@ -106,14 +105,11 @@ double kD = 0.005;//0.005
 
 
 void turn_PID(float targetdegree){
-mid_enc.reset();
 left_enc.reset();
-
-
 //middle_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 //middle_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
- float turn_constant_right = 4.79;//2.4 orig 2.85
- float turn_constant_left = 4.78;//2.42
+float turn_constant_right = 2.52;//2.4 orig 2.85
+ float turn_constant_left = 2.5;//2.42
  int maxVelocity = 70;
  double degreeGoal;
  if (targetdegree > 0){
@@ -130,23 +126,23 @@ left_enc.reset();
  double error = 0;
  double previous_error = degreeGoal;
  double kP = 0.75;
- double kI = 0.0005;
- double kD = 0.001;
+ double kI = 0.0005;//0.0005
+ double kD = 0.010;
  double integral = 0;
  double derivative = 0;
- double revolutions = 0;
+ double revolutions = 0.0;
  if(targetdegree<0){maxVelocity *= -1;}
 
 
  while(!goalMet){
-    revolutions = -mid_enc.get_value();
 
-    //revolutions = rightenc.get_value();
+
+    revolutions = ((2*left_enc.get_value())/7);
     currentPosition = revolutions;
 
 
    error = degreeGoal - currentPosition;
-   if (std::abs(error) < 300){
+   if (std::abs(error) < 200){
      integral += error;
    }
 
@@ -169,6 +165,11 @@ left_enc.reset();
      slewRateControl(&back_right_wheel, rightTarget, DEFAULTSLEWRATEINCREMENT);
      slewRateControl(&middle_left_wheel, leftTarget, DEFAULTSLEWRATEINCREMENT);
      slewRateControl(&middle_right_wheel, rightTarget, DEFAULTSLEWRATEINCREMENT);
+
+    //front_left_wheel.move_velocity(leftTarget);//*0.94
+  //  back_left_wheel.move_velocity(leftTarget);//*0.94/
+  //  front_right_wheel.move_velocity(rightTarget);
+  //  back_right_wheel.move_velocity(rightTarget);
 
    if (std::abs(error) < 4){
      goalMet = true;
@@ -299,14 +300,20 @@ void brakeMotor(){
   back_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   front_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   back_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  middle_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  middle_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   front_left_wheel.move_velocity(0);
   front_right_wheel.move_velocity(0);
   back_left_wheel.move_velocity(0);
   back_right_wheel.move_velocity(0);
+  middle_left_wheel.move_velocity(0);
+  middle_right_wheel.move_velocity(0);
 }
 void unbrakeMotor(){
   front_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
   back_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
   front_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
   back_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+  middle_left_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+  middle_right_wheel.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 }
