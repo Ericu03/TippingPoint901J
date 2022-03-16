@@ -60,8 +60,8 @@ void opcontrol() {
 
 
 	while(true){
-//std::cout <<"middle:" << mid_enc.get_value();
-
+std::cout <<"left:" << left_enc.get_value();
+//std::cout <<"right:" << front_left_wheel.get_position();
 		double power = 200*master.get_analog(ANALOG_LEFT_Y)/127;
 	double turn = 200*master.get_analog(ANALOG_RIGHT_X)/127;
 	int l = (int)(pow(((power + turn)/200.0),2.0)*200.0);
@@ -210,3 +210,4 @@ void opcontrol() {
 	pros::delay(5);
 	}
 }
+
