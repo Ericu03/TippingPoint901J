@@ -35,7 +35,7 @@ pros::Motor intake_l(INTAKE_L,pros::E_MOTOR_GEARSET_18,true, pros::E_MOTOR_ENCOD
 pros::Motor intake_r(INTAKE_R,pros::E_MOTOR_GEARSET_18,false, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor lift(LIFT, pros::E_MOTOR_GEARSET_18,true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor ring(RING, pros::E_MOTOR_GEARSET_06,false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::ADIEncoder left_enc (LENC_TOP, LENC_BOT, true);
+pros::ADIEncoder left_enc (LENC_TOP, LENC_BOT, false);
 pros::ADIEncoder mid_enc (MID_TOP, MID_BOT, false);
 pros::ADIDigitalOut pneumatic1 (PNEUMATIC1);
 pros::ADIDigitalOut pneumatic2 (PNEUMATIC2);
